@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+ 
+   <changeSet id="1" author="martijn" runOnChange="false">
+     	<comment>Create assembly_info table</comment>
+        <createTable tableName="assembly_info">
+            <column name="assembly" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chunksize" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="martijn" runOnChange="false">
+     	<comment>Create GRCh37 assembly table</comment>
+     	<insert tableName="assembly_info">
+     		<column name="assembly" value="assembly_human_37" />
+     		<column name="chunksize" valueNumeric="100000" />
+     	</insert>
+        <createTable tableName="assembly_human_37">
+            <column name="start" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chr" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chunk" type="text">
+                <constraints nullable="false"/>
+            </column>            
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="martijn" runOnChange="false">
+     	<comment>Create mouse 37 assembly table</comment>
+     	<insert tableName="assembly_info">
+     		<column name="assembly" value="assembly_mouse_37" />
+     		<column name="chunksize" valueNumeric="100000" />
+     	</insert>
+        <createTable tableName="assembly_mouse_37">
+            <column name="start" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chr" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chunk" type="text">
+                <constraints nullable="false"/>
+            </column>            
+        </createTable>
+    </changeSet>
+    <changeSet id="4" author="martijn" runOnChange="false">
+     	<comment>Create fruitlfy 60 assembly table</comment>
+     	<insert tableName="assembly_info">
+     		<column name="assembly" value="assembly_drosophila_60" />
+     		<column name="chunksize" valueNumeric="100000" />
+     	</insert>
+        <createTable tableName="assembly_drosophila_60">
+            <column name="start" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chr" type="varchar(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chunk" type="text">
+                <constraints nullable="false"/>
+            </column>            
+        </createTable>
+    </changeSet>
+    
+</databaseChangeLog>

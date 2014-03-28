@@ -1,0 +1,2 @@
+Configuration file for jena fuseki indicating a number of SPARQL endpoints.
+A direct interface with d2rq is included. For more detail on this, refer to http://github.com/mr-tijn/d2rq_ensembl_faldo

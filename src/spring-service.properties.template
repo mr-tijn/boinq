@@ -1,0 +1,46 @@
+log.level=debug
+log.path=logs
+
+# ENSEMBL DATABASE
+ensemblDb.driver=com.mysql.jdbc.Driver
+ensemblDb.username=
+ensemblDb.password=
+ensemblDb.urlHomoSapiens=jdbc:mysql://localhost:3306/homo_sapiens_core_71_37
+# for future use
+ensemblDb.urlMusMusculus=
+ensemblDb.urlDrosophila=
+
+# ASSEMBLY DATABASE
+assemblyDb.url=jdbc:mysql://localhost:3306/AssemblyDb
+assemblyDb.driver=com.mysql.jdbc.Driver
+assemblyDb.username=
+assemblyDb.password=
+
+# BOINQ DATABASE
+viewsDB.url=jdbc:mysql://localhost:3306/viewsdb
+viewsDB.driver=com.mysql.jdbc.Driver
+viewsDB.username=
+viewsDB.password=
+viewsDB.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# FOR INTERNAL USE AT BIOBIX ONLY
+biomixDb.url=
+biomixDb.driver=com.mysql.jdbc.Driver
+biomixDb.username=
+biomixDb.password=
+
+# GENERIC SETTINGS
+hibernate.showSQL=true
+hibernate.debugSQL=true
+hibernate.search.indexBase=indexBase
+login.target=/ViewsGWT.html
+login.page=/ViewsGWT/login.jsp
+login.fail=/ViewsGWT/spring_security_login?login_error
+sparql.base.path=/ontologies
+ssb.assembler.file=/ontologies/so.ttl
+
+# ENDPOINTS
+localSparqlServer=http://localhost:3030/ALL/query
+localMetaServer=http://localhost:3030/META/query
+localEnsemblServer=http://localhost:3030/ENSEMBL_MAT/query
+bioPortalAPIKey=

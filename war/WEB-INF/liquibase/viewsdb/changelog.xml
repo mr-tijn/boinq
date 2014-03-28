@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+ 
+     <changeSet id="1" author="martijn" runOnChange="false">
+     	<comment>Create user table</comment>
+        <createTable tableName="user">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>            
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="martijn" runOnChange="false">
+     	<comment>Create role table</comment>
+        <createTable tableName="role">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authority" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>            
+        </createTable>
+    </changeSet>
+	<changeSet id="3" author="martijn" runOnChange="false">
+		<comment>Modify role table to use fk to user table</comment>
+		<addColumn tableName="role">
+			<column name="user_id" type="int"/>
+		</addColumn>
+		<dropColumn tableName="role" columnName="username"/>
+		<addForeignKeyConstraint constraintName="fk_role_user"
+			baseTableName="role" baseColumnNames="user_id"
+    		referencedTableName="user" referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet id="4" author="martijn" runOnChange="false">
+		<comment>Add auto increments for role and user</comment>
+		<addAutoIncrement tableName="role" columnName="id" columnDataType="int"/>
+		<dropForeignKeyConstraint baseTableName="role" constraintName="fk_role_user"/>
+		<addAutoIncrement tableName="user" columnName="id" columnDataType="int"/>
+		<addForeignKeyConstraint constraintName="fk_role_user"
+			baseTableName="role" baseColumnNames="user_id"
+    		referencedTableName="user" referencedColumnNames="id"/>
+		
+	</changeSet>
+	<changeSet id="5" author="martijn" runOnChange="false">
+		<comment>Create featureDataSource table</comment>
+		<createTable tableName="featuredatasource">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" primaryKeyName="featuredatasource_pk"/>
+			</column>
+			<column name="name" type="varchar(50)"/>
+			<column name="description" type="text"/>
+			<column name="filterable" type="boolean"/>
+			<column name="ispublic" type="boolean"/>
+			<column name="fk_user_id" type="int"/>
+			<column name="DSTYPE" type="varchar(50)"/>
+			<!-- for GFF datasources -->
+			<column name="filepath" type="varchar(150)"/>
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_featuredatasource_user"
+			baseTableName="featuredatasource" baseColumnNames="fk_user_id"
+    		referencedTableName="user" referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet id="6" author="martijn" runOnChange="false">
+		<comment>Put username directly into table to avoid serialization issues</comment>
+		<dropForeignKeyConstraint baseTableName="featuredatasource" constraintName="fk_featuredatasource_user"/>
+		<dropColumn tableName="featuredatasource" columnName="fk_user_id"/>
+		<addColumn tableName="featuredatasource">
+			<column name="owner" type="varchar(50)" />
+		</addColumn>
+		<addUniqueConstraint tableName="user" columnNames="username"/>
+		<addForeignKeyConstraint constraintName="fk_featuredatasource_user" baseTableName="featuredatasource" baseColumnNames="owner" referencedTableName="user" referencedColumnNames="username"/>
+	</changeSet>	
+	<changeSet id="7" author="martijn" runOnChange="false">
+		<comment>Add parameter for refseq ds</comment>
+		<addColumn tableName="featuredatasource">
+			<column name="assemblyname" type="varchar(50)" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="8" author="martijn" runOnChange="false">
+		<comment>Add chromosomeprefix property to featuredatasource</comment>
+		<addColumn tableName="featuredatasource">
+			<column name="chromosomeprefix" type="varchar(50)"/>
+		</addColumn>
+	</changeSet>
+	<changeSet id="9" author="martijn" runOnChange="false">
+		<comment>Create trackspecification and renderersettings table</comment>
+		<createTable tableName="trackspecification">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="featuredatasource_id" type="int" />
+			<column name="filterexpression" type="varchar(1000)" />
+			<column name="owner" type="varchar(50)" />
+			<column name="ispublic" type="boolean" />
+		</createTable>
+		<createTable tableName="renderersettings">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="track_id" type="int"/>
+			<column name="renderername" type="varchar(50)" />
+			<column name="featureheight" type="int" />
+			<column name="featurecolor" type="varchar(50)" />
+			<column name="linecolor" type="varchar(50)" />
+			<column name="linewidth" type="int" />
+			<column name="gapwidth" type="int" />
+			<column name="minhue" type="double" />
+			<column name="maxhue" type="double" />
+			<column name="minscore" type="double" />
+			<column name="maxscore" type="double" />
+			<column name="mainfeaturecolor" type="varchar(50)" />
+			<column name="subfeaturecolor" type="varchar(50)" />
+			<column name="RSTYPE" type="varchar(50)" />
+			<!-- for graph renderers -->
+			<column name="typegraph" type="varchar(50)" />
+			<column name="graphheight" type="int" />
+			<column name="graphcolor" type="varchar(50)" />
+			<column name="frameworkcolor" type="varchar(50)" />
+			<column name="graphlinewidth" type="int" />
+			<column name="showgrid" type="boolean" />
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_trackspecification_user" baseTableName="trackspecification" baseColumnNames="owner" referencedTableName="user" referencedColumnNames="username"/>
+		<addForeignKeyConstraint constraintName="fk_trackspecification_featuredatasource" baseTableName="trackspecification" baseColumnNames="featuredatasource_id" referencedTableName="featuredatasource" referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_renderersettings_trackspecification" baseTableName="renderersettings" baseColumnNames="track_id" referencedTableName="trackspecification" referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet id="10" author="martijn" runOnChange="false">
+		<comment>Modify link between trackspecification and renderersettings</comment>
+		<dropForeignKeyConstraint baseTableName="renderersettings" constraintName="fk_renderersettings_trackspecification"/>
+		<dropColumn tableName="renderersettings" columnName="track_id"/>
+		<addColumn tableName="trackspecification">
+			<column name="renderersettings_id" type="int"/>
+		</addColumn>
+		<addForeignKeyConstraint constraintName="fk_trackspecification_renderersettings" baseTableName="trackspecification" baseColumnNames="renderersettings_id" referencedTableName="renderersettings" referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet id="11" author="martijn" runOnChange="false">
+		<comment>Add title and description to trackspecification</comment>
+		<addColumn tableName="trackspecification">
+			<column name="title" type="varchar(50)"/>
+			<column name="description" type="text"/>
+		</addColumn>
+	</changeSet>
+	<changeSet id="12" author="martijn" runOnChange="false">
+		<comment>Add height to trackspecification</comment>
+		<addColumn tableName="trackspecification">
+			<column name="height" type="int" defaultValue="50"/>
+		</addColumn>
+	</changeSet>
+	<changeSet id="13" author="martijn" runOnChange="false">
+		<comment>Add the genomicregion table</comment>
+		<createTable tableName="genomicregion">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="visible_start" type="bigint" />
+			<column name="visible_end" type="bigint" />
+			<column name="contig" type="varchar(20)" />
+			<column name="strand" type="boolean" />
+			<column name="species_id" type="integer" />
+			<column name="roi_id" type="bigint"/>
+		</createTable>
+		<createTable tableName="roi">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="varchar(50)" />
+			<column name="rank" type="int" />
+			<column name="owner" type="varchar(50)" />
+			<column name="is_public" type="boolean" />
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_genomicregion_roi" baseTableName="genomicregion" baseColumnNames="roi_id" referencedTableName="roi" referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_roi_user" baseTableName="roi" baseColumnNames="owner" referencedTableName="user" referencedColumnNames="username"/>
+	</changeSet>
+	<changeSet id="14" author="martijn">
+		<comment>add name field to genomic region</comment>
+		<addColumn tableName="genomicregion">
+			<column name="name" type="varchar(50)" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="15" author="martijn">
+		<comment>add browser perspectives</comment>
+		<createTable tableName="browserperspective">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="varchar(50)"/>
+			<column name="is_default" type="boolean"/>
+			<column name="is_public" type="boolean"/>
+			<column name="owner" type="varchar(50)"/>
+		</createTable>
+		<addUniqueConstraint tableName="user" columnNames="username"/>
+		<addForeignKeyConstraint constraintName="fk_browserperspective_user" baseTableName="browserperspective" baseColumnNames="owner" referencedTableName="user" referencedColumnNames="username"/>
+		<createTable tableName="browserperspective_trackspecification">
+			<column name="track_id" type="int" />
+			<column name="perspective_id" type="bigint" />
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_browserperspective_trackspecification_trackspecification" baseTableName="browserperspective_trackspecification" baseColumnNames="track_id" referencedTableName="trackspecification" referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_browserperspective_trackspecification_browserperspective" baseTableName="browserperspective_trackspecification" baseColumnNames="perspective_id" referencedTableName="browserperspective" referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet id="16" author="martijn">
+		<comment>fix BBxAssemblyDatasource</comment>
+		<addColumn tableName="featuredatasource">
+			<column name="sample_id" type="varchar(50)" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="17" author="martijn">
+		<comment>add ordering to tracks in browserperspective</comment>
+		<addColumn tableName="browserperspective_trackspecification">
+			<column name="rank" type="int" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="18" author="martijn">
+		<comment>add fields for refering region to feature</comment>
+		<addColumn tableName="roi">
+			<column name="regionStartFromStart" type="boolean" />
+			<column name="regionEndFromStart" type="boolean" />
+			<column name="regionStartOffset" type="boolean" />
+			<column name="regionEndOffset" type="boolean" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="19" author="martijn">
+		<comment>add fields to region of interest table</comment>
+		<addColumn tableName="roi">
+			<column name="status" type="integer" />
+			<column name="expression" type="text" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="20" author="martijn">
+		<comment>change field types</comment>
+		<modifyDataType tableName="roi" columnName="regionStartOffset" newDataType="integer"/>
+		<modifyDataType tableName="roi" columnName="regionEndOffset" newDataType="integer"/>
+	</changeSet>
+		<changeSet id="21" author="martijn">
+		<comment>change field types</comment>
+		<modifyDataType tableName="roi" columnName="name" newDataType="varchar(100)"/>
+	</changeSet>
+	<changeSet id="22" author="martijn">
+		<comment>add count reads per region analysis</comment>
+		<createTable tableName="analysis">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="analysis_type" type="varchar(20)" /> <!-- prepares for polymorph table later on -->
+			<column name="status" type="integer" />
+			<column name="description" type="text" />
+			<column name="resultsummary" type="text" />
+			<column name="owner" type="varchar(50)" />
+			<column name="name" type="varchar(100)" />
+			<column name="is_public" type="boolean" />
+			<column name="roi_id" type="bigint" />
+			<column name="track_id" type="int" />
+		</createTable>
+		<createIndex tableName="analysis" indexName="analysis_type_idx">
+			<column name="analysis_type" type="varchar(20)"/>
+		</createIndex>
+		<addNotNullConstraint tableName="analysis" columnName="owner" columnDataType="varchar(50)"/>
+		<addForeignKeyConstraint constraintName="fk_analysis_roi" baseTableName="analysis" baseColumnNames="roi_id" referencedTableName="roi" referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_analysis_user" baseTableName="analysis" baseColumnNames="owner" referencedTableName="user" referencedColumnNames="username"/>
+		<addForeignKeyConstraint constraintName="fk_analysis_trackspecification" baseTableName="analysis" baseColumnNames="track_id" referencedTableName="trackspecification" referencedColumnNames="id"/>
+		<createTable tableName="regioncount">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="count" type="bigint" />
+			<column name="genomicregion_id" type="bigint" />
+			<column name="analysis_id" type="bigint" />
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_regioncount_genomicregion" baseTableName="regioncount" baseColumnNames="genomicregion_id" referencedTableName="genomicregion" referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_regioncount_analysis" baseTableName="regioncount" baseColumnNames="analysis_id" referencedTableName="analysis" referencedColumnNames="id"/>
+	</changeSet>
+	
+</databaseChangeLog>

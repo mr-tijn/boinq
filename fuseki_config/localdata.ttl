@@ -1,0 +1,142 @@
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix d2rq:	 <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix reasoner: <http://jena.hpl.hp.com/2003/RuleReasoner#> .
+@prefix lm: <http://jena.hpl.hp.com/2004/08/location-mapping#> .
+@prefix owl: 	<http://www.w3.org/2002/07/owl#> .
+@prefix local: <http://www.boinq.org/localdata#> .
+
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model      .
+d2rq:D2RQModel	rdfs:subClassOf	 ja:Model	   .
+
+
+[] a fuseki:Server
+	; ja:context [ 
+		ja:cxtName "arq:queryTimeout" ;  
+		ja:cxtValue "1000000" ]
+	; ja:imports <d2rq.rdf>
+	; ja:loadClass "com.hp.hpl.jena.tdb.TDB"
+	; ja:loadClass "de.fuberlin.wiwiss.d2rq.jena.GraphD2RQ"
+	; fuseki:services (
+		<#AllDS>
+		<#ENSEMBL>
+		<#ENSEMBL_MAT>
+		<#META> 
+		<#META_DYNAMIC> )
+	.
+	
+
+<#META_DYNAMIC> rdf:type fuseki:Service
+# Updateable Metadata endpoint
+	; fuseki:name "META_DYNAMIC"
+	; fuseki:serviceQuery "query"
+	; fuseki:serviceQuery "sparql"
+	; fuseki:serviceUpdate "update"
+	; fuseki:serviceUpdate "sparul"
+	; fuseki:serviceReadWriteGraphStore "data"
+	; fuseki:dataset [
+		rdf:type tdb:DatasetTDB;
+		tdb:location "/opt/ontologies/metaTDB/" ]
+	.
+
+
+<#AllDS> rdf:type fuseki:Service
+    ; fuseki:name "ALL"
+    ; fuseki:serviceQuery "query"
+    ; fuseki:serviceReadGraphStore "data"
+    ; fuseki:dataset <#fulldataset> ;
+    .
+
+<#fulldataset> rdf:type ja:RDFDataset
+	; ja:defaultGraph <#union>
+	; ja:namedGraph [
+		ja:graph <#ensemblHuman> ;
+		ja:graphName "http://www.boinq.org/homo_sapiens_core_71_37_simple" ]
+	; ja:namedGraph [
+		ja:graph <#datasourceInferenced> ;
+		ja:graphName "http://www.boinq.org/datasource" ]
+	.
+
+<#union> rdf:type ja:UnionModel
+	; ja:subModel <#ensemblHuman>
+	; ja:subModel <#datasourceInferenced>
+	.
+
+<#ENSEMBL> rdf:type fuseki:Service
+	; fuseki:name "ENSEMBL"
+	; fuseki:serviceQuery "query"
+	; fuseki:serviceReadGraphStore "data"
+	; fuseki:dataset <#ensembldataset> ;
+	.
+
+<#ENSEMBL_MAT> rdf:type fuseki:Service
+	; fuseki:name "ENSEMBL_MAT"
+	; fuseki:serviceQuery "query"
+	; fuseki:serviceReadGraphStore "data"
+	; fuseki:dataset [
+		rdf:type tdb:DatasetTDB;
+		tdb:location "/opt/ontologies/ensemblTDB/" ]
+	.
+
+<#ensembldataset> rdf:type ja:RDFDataset
+#the default graph needs to be a d2rq graph
+#otherwise the correct sparql engine will not be used
+#resulting in errors during more complicated queries
+	; ja:defaultGraph <#ensemblHuman>
+	; ja:namedGraph [
+		ja:graph <#ensemblHuman> ;
+		ja:graphName "http://www.boinq.org/ensemblHuman" ]
+	.
+
+<#ensemblHuman> rdf:type d2rq:D2RQModel
+	; d2rq:mappingFile <homo_sapiens_core_71_37_simple.ttl>
+	; d2rq:resourceBaseURI <http://www.boinq.org/homo_sapiens_core_71_37_simple#>
+	.
+
+#<#RDFSReasonerFactory> rdf:type ja:ReasonerFactory
+#	; ja:reasonerClass "com.hp.hpl.jena.reasoner.rulesys.RDFSRuleReasonerFactory"
+#	; reasoner:setRDFSLevel "full"
+#	.
+
+<#META> rdf:type fuseki:Service
+	; fuseki:name "META"
+	; fuseki:serviceQuery "query"
+	; fuseki:serviceReadGraphStore "data"
+	; fuseki:dataset <#metadataset> ;
+	.
+
+<#metadataset> rdf:type ja:RDFDataset
+	; ja:defaultGraph <#datasources>
+	; ja:namedGraph [
+		ja:graph <#datasources> ;
+		ja:graphName "http://www.boinq.org/datasource" ]
+	.
+
+<#datasources> rdf:type ja:UnionModel
+	; ja:subModel <#ensemblMeta_71_37_simple>
+	; ja:subModel <#datasourceInferenced>
+	.
+
+<#ensemblMeta_71_37_simple> rdf:type ja:MemoryModel
+	; rdfs:label "Ensembl 71_37 simplified meta information"
+	; ja:content [ ja:externalContent <file:/opt/ontologies/ensembl_meta_71_37_simple.rdf> ]
+	.
+	
+<#datasourceInferenced> rdf:type ja:InfModel
+	; ja:baseModel <#datasource>
+	; ja:reasoner <#OWLReasonerFactory>
+	.
+
+<#datasource> rdf:type ja:MemoryModel
+	; rdfs:label "Datasource repository"
+	; ja:content [ ja:externalContent <file:/opt/ontologies/datasource.owl> ;
+				   ja:externalContent <file:/opt/ontologies/faldo.rdf> ]
+	.
+		
+<#OWLReasonerFactory> rdf:type ja:ReasonerFactory
+	; ja:reasonerClass "com.hp.hpl.jena.reasoner.rulesys.OWLMiniReasonerFactory"
+	.

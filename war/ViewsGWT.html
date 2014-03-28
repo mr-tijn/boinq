@@ -1,0 +1,102 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="ViewsGWT.css">
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>BoinQ</title>
+    
+    <!-- IMPORTANT : You must set the variable isomorphicDir to [MODULE_NAME]/sc/ so that the SmartGWT resource are 
+	 correctly resolved -->	
+	<script> var isomorphicDir = "viewsgwt/sc/"; </script>
+    
+    
+      
+    
+    
+    <!--CSS for loading message at application Startup-->
+	<style type="text/css">
+	body {
+		overflow: hidden
+	}
+	
+	#loading {
+		border: 1px solid #ccc;
+		position: absolute;
+		left: 40%;
+		top: 40%;
+		width: 20%;
+		padding: 2px;
+		z-index: 20001;
+		height: auto;
+	}
+	
+	#loading a {
+		color: #225588;
+	}
+	
+	#loading .loadingIndicator {
+		background: white;
+		font: bold 13px tahoma, arial, helvetica;
+		padding: 10px;
+		margin: 0;
+		height: auto;
+		color: #444;
+	}
+	
+	#loadingMsg {
+		font: normal 10px arial, tahoma, sans-serif;
+	}
+	</style>
+
+</head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body>
+
+    <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!--add loading indicator while the app is being loaded-->
+	<div id="loadingWrapper">
+	<div id="loading">
+	<div class="loadingIndicator">
+	    <img src="/images/loading_full.gif" width="50" height="50" style="margin-right:8px;float:left;vertical-align:top;"/>BoinQ<br/>
+	    <span id="loadingMsg">Loading styles and images...</span></div>
+	    </div>
+	</div>
+
+	<script type="text/javascript">document.getElementById('loadingMsg').innerHTML = 'Loading Application<br>Please wait...';</script>
+    <script type="text/javascript" language="javascript" src="viewsgwt/viewsgwt.nocache.js"></script>
+
+	<script type="text/javascript">document.getElementById('loadingMsg').innerHTML = 'Loading DataSources<br>Please wait...';</script>
+    <script src="viewsgwt/sc/DataSourceLoader?dataSource=OntologyHierarchy"></script>
+    
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+  </body>
+</html>

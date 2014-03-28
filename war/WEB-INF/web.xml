@@ -1,0 +1,121 @@
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+	<display-name>BoinQ</display-name>
+	
+
+  	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>WEB-INF/classes/log4j.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring-service.xml</param-value>
+	</context-param>
+	
+	<filter>
+    	<filter-name>springSecurityFilterChain</filter-name>
+	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+    	<filter-name>springSecurityFilterChain</filter-name>
+    	<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>	
+
+	
+	<!-- servlets -->
+
+	<servlet>
+		<servlet-name>IDACall</servlet-name>
+		<servlet-class>com.isomorphic.servlet.IDACall</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>IDACall</servlet-name>
+		<url-pattern>/viewsgwt/sc/IDACall/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>DataSourceLoader</servlet-name>
+		<servlet-class>com.isomorphic.servlet.DataSourceLoader</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DataSourceLoader</servlet-name>
+		<url-pattern>/sc/DataSourceLoader</url-pattern>
+	</servlet-mapping>
+		<servlet-mapping>
+		<servlet-name>DataSourceLoader</servlet-name>
+		<url-pattern>/viewsgwt/sc/DataSourceLoader</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>DataSourceLoader</servlet-name>
+		<url-pattern>/ViewsGWT/viewsgwt/sc/DataSourceLoader</url-pattern>
+	</servlet-mapping>
+	
+<!-- 	<servlet>
+		<servlet-name>login</servlet-name>
+		<jsp-file>/login.jsp</jsp-file>
+	</servlet> -->
+	
+	<servlet>
+		<servlet-name>featureServlet</servlet-name>
+		<servlet-class>com.genohm.viewsGWT.server.FeatureServerImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>featureServlet</servlet-name>
+		<url-pattern>/viewsgwt/featureServer</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>viewsServlet</servlet-name>
+		<servlet-class>com.genohm.viewsGWT.server.ViewsServerImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>viewsServlet</servlet-name>
+		<url-pattern>/viewsgwt/viewsServer</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+   		<servlet-name>uploadServlet</servlet-name>
+   		<servlet-class>com.genohm.viewsGWT.server.FileUploadServlet</servlet-class>
+ 	</servlet>
+ 	<servlet-mapping>
+   		<servlet-name>uploadServlet</servlet-name>
+   		<url-pattern>/viewsgwt/upload</url-pattern>
+ 	</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>PreCache</servlet-name>
+		<servlet-class>com.isomorphic.servlet.PreCache</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>Init</servlet-name>
+		<servlet-class>com.isomorphic.base.Init</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring-service.xml</param-value>
+		</init-param>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+	
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>ViewsGWT.html</welcome-file>
+	</welcome-file-list>
+
+</web-app>

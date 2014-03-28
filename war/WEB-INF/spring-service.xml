@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flex="http://www.springframework.org/schema/flex"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd  
+		http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<context:component-scan base-package="com.genohm" />
+
+	<tx:annotation-driven />
+	
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:spring-service.properties"/>
+	</bean>
+
+	<bean id="updateViewsDB" class="liquibase.integration.spring.SpringLiquibase">
+		<property name="dataSource" ref="viewsDS" />
+		<property name="changeLog" value="WEB-INF/liquibase/viewsdb/changelog.xml" />
+	</bean>
+
+	<bean id="updateAssemblyDB" class="liquibase.integration.spring.SpringLiquibase">
+		<property name="dataSource" ref="assemblyDS" />
+		<property name="changeLog" value="WEB-INF/liquibase/assemblydb/changelog.xml" />
+	</bean>
+
+	<bean id="featureServer" class="com.genohm.viewsGWT.server.FeatureServerImpl">
+		<property name="assemblyEngineHuman" ref="assemblyEngineHuman" />
+		<property name="ensemblEngineFruitFly" ref="ensemblEngineFruitFly" />
+		<property name="ensemblEngineHuman" ref="ensemblEngineHuman" />
+		<property name="ensemblEngineMouse" ref="ensemblEngineMouse" />
+		<property name="gffEngine" ref="gffEngine" />
+		<property name="sparqlEngine" ref="sparqlEngine" />
+		<!-- property name="biobixEngine" ref="biobixEngine" /-->
+	</bean>
+
+	<bean id="viewsServer" class="com.genohm.viewsGWT.server.ViewsServerImpl">
+		<property name="viewsDao" ref="viewsDao" />
+		<property name="ensemblGeneDao" ref="ensemblGeneDAO" />
+		<property name="sparqlClient" ref="localSparqlClient" />
+		<property name="trackClient" ref="trackClient" />
+		<property name="computationEngine" ref="quartzEngine" />
+	</bean>
+
+	<bean id="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="waitForJobsToCompleteOnShutdown" value="true" />
+		<property name="quartzProperties">
+      		<props>
+        		<prop key="org.quartz.threadPool.threadCount">1</prop>
+      		</props>
+    	</property>
+		
+	</bean>
+
+	<bean id="quartzEngine" class="com.genohm.viewsGWT.server.analysis.ComputationEngine">
+		<property name="mainScheduler" ref="quartzScheduler" />
+		<property name="viewsDao" ref="viewsDao" />
+		<property name="sparqlClient" ref="localEnsemblClient" />
+		<property name="featureServer" ref="featureServer" />
+	</bean>
+
+	<bean id="trackClient" class="com.genohm.viewsGWT.server.ontologyclient.TrackClient">
+		<property name="sparqlClient" ref="localMetaClient" />
+	</bean>
+
+	<bean id="localSparqlClient" class="com.genohm.viewsGWT.server.external.SPARQLClient">
+		<constructor-arg type="java.lang.String" value="${localSparqlServer}" />
+	</bean>
+	
+	<bean id="localMetaClient" class="com.genohm.viewsGWT.server.external.SPARQLClient">
+		<constructor-arg type="java.lang.String" value="${localMetaServer}" />
+	</bean>
+	
+	<bean id="localEnsemblClient" class="com.genohm.viewsGWT.server.external.SPARQLClient">
+		<constructor-arg type="java.lang.String" value="${localEnsemblServer}"/>
+	</bean>
+	
+	<bean id="bioPortalClient" class="com.genohm.viewsGWT.server.external.SPARQLClient">
+		<constructor-arg type="java.lang.String" value="http://sparql.bioontology.org/ontologies/sparql/?apikey=${bioPortalAPIKey}" />
+	</bean>
+
+	<bean id="naiveQueryGenerator" class="com.genohm.viewsGWT.server.query.NaiveQueryGenerator" />
+	
+	<bean id="ensemblEngineFruitFly" class="com.genohm.viewsGWT.server.data.EnsemblEngine">
+		<!-- <property name="dataSource" ref="ensemblDrosophilaDS" /> -->
+		<constructor-arg ref="ensemblDrosophilaDS" />
+		<property name="ensemblCoordinateID" value="1" />
+		<property name="ensemblCpGAnalysisID" value="9" />
+		<property name="genomicSequenceTable" value="Drosophila_melanogaster_BDGP5" />
+		<property name="speciesId" value="7227" />
+
+	</bean>
+
+	<bean id="ensemblEngineHuman" class="com.genohm.viewsGWT.server.data.EnsemblEngine">
+		<!-- <property name="dataSource" ref="ensemblHomoSapiensDS" /> -->
+		<constructor-arg ref="ensemblHomoSapiensDS"/>
+		<property name="ensemblCoordinateID" value="2" />
+		<property name="ensemblCpGAnalysisID" value="9" />
+		<property name="genomicSequenceTable" value="Homo_sapiens_hg19" />
+		<property name="speciesId" value="9606" />
+		<property name="assemblyEngine" ref="assemblyEngineHuman" />
+	</bean>
+
+	<bean id="ensemblEngineMouse" class="com.genohm.viewsGWT.server.data.EnsemblEngine">
+		<!-- <property name="dataSource" ref="ensemblMusMusculusDS" /> -->
+		<constructor-arg ref="ensemblMusMusculusDS" />
+		<property name="ensemblCoordinateID" value="1" />
+		<property name="ensemblCpGAnalysisID" value="4" />
+		<property name="genomicSequenceTable" value="Mus_musculus_NCBIM37" />
+		<property name="speciesId" value="10090" />
+	</bean>
+
+	<bean id="assemblyEngineHuman" class="com.genohm.viewsGWT.server.data.AssemblyEngine" init-method="init">
+		<property name="dataSource" ref="assemblyDS" />
+		<property name="assemblyName" value="assembly_human_37" />
+	</bean>
+	
+	<bean id="assemblyEngineFruitFly" class="com.genohm.viewsGWT.server.data.AssemblyEngine" init-method="init">
+		<property name="dataSource" ref="assemblyDS" />
+		<property name="assemblyName" value="assembly_mouse_37" />
+	</bean>
+	
+	<bean id="assemblyEngineMouse" class="com.genohm.viewsGWT.server.data.AssemblyEngine" init-method="init">
+		<property name="dataSource" ref="assemblyDS" />
+		<property name="assemblyName" value="assembly_drosophila_60" />
+	</bean>
+	
+<!-- 	<bean id="gffIndexer" class="com.genohm.viewsGWT.server.twinql.GFFIndexer">
+		<property name="lineIndex" ref="derbyFeatureIndex" />
+	</bean>
+
+	<bean id="derbyFeatureIndex" class="com.genohm.viewsGWT.server.twinql.DerbyFeatureIndex" scope="prototype">
+		<property name="dataSource" ref="GFFIndexDS"/>	
+	</bean>
+ -->
+	<bean id="gffEngine" class="com.genohm.viewsGWT.server.data.GFFEngine" />
+
+	<bean id="gffModelBuilder" class="com.genohm.viewsGWT.server.twinql.GFFModelBuilder" >
+		<property name="ssbTools" ref="ssbTools" />
+	</bean>
+	
+	<bean id="ssbTools" class="com.genohm.viewsGWT.server.twinql.SSBTools" >
+		<property name="assemblerFile" value="${ssb.assembler.file}" />
+		<property name="soUri" value="http://www.semantic-systems-biology.org/so" />
+		<property name="goUri" value="http://www.semantic-systems-biology.org/go" />
+	</bean>
+
+	<bean id="sparqlEngine" class="com.genohm.viewsGWT.server.data.SPARQLEngine">
+		<property name="basePath" value="${sparql.base.path}" />
+		<property name="gffModelBuilder" ref="gffModelBuilder" />
+	</bean>
+	
+<!-- 	<bean id="biobixEngine" class="com.genohm.viewsGWT.server.data.BiobixEngine"> -->
+<!-- 		<property name="readLength" value="51" /> -->
+<!-- 		<property name="dataSource" ref="biomixDS" /> -->
+<!-- 	</bean> -->
+
+	<bean id="assemblyLoaderBean" class="com.genohm.viewsGWT.tools.initializer.AssemblyLoader">
+		<property name="dataSource" ref="assemblyDS" />
+	</bean>
+
+	<bean id="featureDatasourceLoaderBean" class="com.genohm.viewsGWT.tools.initializer.FeatureDatasourceLoader">
+		<property name="sessionFactory" ref="viewsSessionFactory" />
+	</bean>
+
+	<bean id="ensemblGeneDAO" class="com.genohm.viewsGWT.server.data.EnsemblGeneDAO">
+		<property name="sessionFactory" ref="ensemblGeneDaoSessionFactory" />
+	</bean>
+	
+<!-- 	<bean id="ensemblGeneDaoSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"> -->
+	<bean id="ensemblGeneDaoSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"> 
+		<property name="dataSource" ref="ensemblHomoSapiensDS" />
+
+		<property name="packagesToScan">
+			<list>
+				<value>com.genohm.viewsGWT.server.*</value>
+				<value>com.genohm.viewsGWT.shared.GenomicRegion</value>
+				<value>com.genohm.viewsGWT.shared.*</value>
+			</list>
+		</property>
+		
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.bytecode.use_reflection_optimizer">false</prop>
+				<prop key="hibernate.dialect">${viewsDB.hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.showSQL}</prop>
+				<prop key="hibernate.debug_sql">${hibernate.debugSQL}</prop>
+				
+<!-- 				<prop key="hibernate.search.default.directory_provider">org.hibernate.search.store.impl.FSDirectoryProvider</prop> -->
+				<prop key="hibernate.search.default.directory_provider">org.hibernate.search.store.FSDirectoryProvider</prop>
+				<prop key="hibernate.search.indexing_strategy">manual</prop> 
+				<prop key="hibernate.search.default.indexBase">${hibernate.search.indexBase}</prop>				
+			</props>
+		</property>
+		
+	</bean>
+
+	<bean id="viewsDao" class="com.genohm.viewsGWT.server.data.ViewsDao" >
+		<property name="sessionFactory" ref="viewsSessionFactory" />
+	</bean>
+
+	<bean id="viewsTransactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="viewsSessionFactory" />
+	    <qualifier value="views"/>
+  	</bean>
+	
+<!-- 	<bean id="viewsSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"> -->
+	<bean id="viewsSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"> 
+		<property name="dataSource" ref="viewsDS" />
+
+		<property name="packagesToScan">
+			<list>
+				<value>com.genohm.viewsGWT.server.*</value>
+				<value>com.genohm.viewsGWT.shared</value>
+				<value>com.genohm.viewsGWT.shared.*</value>
+			</list>
+		</property>
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.bytecode.use_reflection_optimizer">false</prop>
+				<prop key="hibernate.dialect">${viewsDB.hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.showSQL}</prop>
+				<prop key="hibernate.debug_sql">${hibernate.debugSQL}</prop>				
+			</props>
+		</property>
+	</bean>
+
+	<bean id="viewsDS" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${viewsDB.driver}" />
+		<property name="url" value="${viewsDB.url}" />
+		<property name="username" value="${viewsDB.username}" />
+		<property name="password" value="${viewsDB.password}" />
+
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" />
+
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="true" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+<!-- 	<bean id="GFFIndexDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${derby.driver}" />
+		<property name="url" value="${gffIndex.url}" />
+	</bean>
+ -->
+	<bean id="ensemblHomoSapiensDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${ensemblDb.driver}" />
+		<property name="url" value="${ensemblDb.urlHomoSapiens}" />
+		<property name="username" value="${ensemblDb.username}" />
+		<property name="password" value="${ensemblDb.password}" />
+
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" />
+
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="true" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+	<bean id="ensemblMusMusculusDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${ensemblDb.driver}" />
+		<property name="url" value="${ensemblDb.urlMusMusculus}" />
+		<property name="username" value="${ensemblDb.username}" />
+		<property name="password" value="${ensemblDb.password}" />
+
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" />
+
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="true" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+	<bean id="ensemblDrosophilaDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${ensemblDb.driver}" />
+		<property name="url" value="${ensemblDb.urlDrosophila}" />
+		<property name="username" value="${ensemblDb.username}" />
+		<property name="password" value="${ensemblDb.password}" />
+
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" />
+
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="true" />
+
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+	<bean id="assemblyDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${assemblyDb.driver}" />
+		<property name="url" value="${assemblyDb.url}" />
+		<property name="username" value="${assemblyDb.username}" />
+		<property name="password" value="${assemblyDb.password}" />
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" /><!-- <property name="validationQuery" 
+			value="SELECT 1" /> <property name="testOnBorrow" value="true" /> <property 
+			name="testOnReturn" value="true" /> -->
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+	<bean id="biomixDS" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${biomixDb.driver}" />
+		<property name="url" value="${biomixDb.url}" />
+		<property name="username" value="${biomixDb.username}" />
+		<property name="password" value="${biomixDb.password}" />
+		<property name="initialSize" value="15" />
+		<property name="maxActive" value="40" />
+		<property name="maxIdle" value="40" />
+		<property name="minIdle" value="15" />
+		<property name="maxWait" value="600" />
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="300" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+
+ 	<security:http pattern="/**/images/**" security="none"/>
+ 	<!-- <security:http pattern="/**/login.jsp" security="none"/> -->
+ 	<security:http>
+		<security:intercept-url pattern="/**" access="ROLE_USER" />
+		<!-- <security:form-login default-target-url="${login.target}" login-page="${login.page}" authentication-failure-url="${login.fail}" /> -->
+		<security:form-login default-target-url="${login.target}" />
+		<security:logout />
+	</security:http>
+
+	<security:authentication-manager erase-credentials="true">
+		<security:authentication-provider user-service-ref="viewsUserDetailsService">
+			<security:password-encoder hash="md5" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+	<bean id="viewsAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<property name="userDetailsService" ref="viewsUserDetailsService" />
+	</bean>
+
+	<bean id="viewsUserDetailsService" class="com.genohm.viewsGWT.server.security.ViewsSpringUserDetailsService">
+		<property name="viewsDao" ref="viewsDao" />
+	</bean>
+
+</beans>

@@ -1,0 +1,12 @@
+This repository contains source code for the boinq proof of concept application.
+A binary version and more information can be found at www.boinq.org
+
+the folder src/ contains all java source code
+the folder test/ contains (way too little) tests
+the folder war/ contains config files for deploying on tomcat
+the folder fuseki_config/ contains information on how to configure the fuseki server
+
+No libraries are currently included. Some libraries cannot be included for licensing reasons.
+For open source libraries, a library management system will be set up at some later stage.
+
+Feel free to contact martijn _@t_ genohm _d0t_ com for more information.

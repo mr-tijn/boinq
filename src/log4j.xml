@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+
+	<appender name="rollingFileAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/logs/views.log" />
+	    <param name="MaxFileSize" value="1MB" />
+	    <param name="MaxBackupIndex" value="5" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %5p %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %5p %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="localDebugFile" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/logs/debug.log" />
+	    <param name="MaxFileSize" value="1MB" />
+	    <param name="MaxBackupIndex" value="5" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %5p %c{1} - %m%n" />
+		</layout>
+	</appender>
+	
+	<logger name="org.hibernate">
+		<level value="error" />
+		<!-- debug with ALL -->
+	</logger>
+	
+	
+	<logger name="org.springframework">
+		<level value="error"/>
+	</logger>
+
+	<logger name="com.genohm">
+		<level value="error"/>
+	</logger>
+
+
+	<logger name="org.quartz">
+		<level value="error"/>
+	</logger>
+
+	<root>
+		<level value="error" />
+		<appender-ref ref="consoleAppender" />
+		<appender-ref ref="rollingFileAppender" />
+	</root>
+
+</log4j:configuration>

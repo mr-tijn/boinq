@@ -1,0 +1,45 @@
+License and source information for external tools
+
+Major parts of the software use components from The Apache Software Foundation
+
+http://www.apache.org
+
+The application relies heavily on spring
+
+http://spring.io
+
+The GUI is developed using SmartGWT. Some components of the commercial version
+are used, so we cannot include these libraries. You can factor out these parts
+(mainly the datasource for the ontology term picker) and use the GNU version
+of SmartGWT.
+
+http://smartclient.com/product/smartgwt.jsp
+
+In some experimental areas of the software external parsers are used
+
+* GFF Parser from org.intermine.bio.io.gff3
+
+https://github.com/intermine/intermine
+
+Copyright (C) 2002-2009 FlyMine
+This code may be freely distributed and modified under the
+terms of the GNU Lesser General Public Licence.  This should
+be distributed with the code.  See the LICENSE file for more
+information or http://www.gnu.org/copyleft/lesser.html.
+
+* BED Parser using components from edu.unc.genomics.io
+
+https://github.com/timpalpant/java-genomics-io
+
+Copyright 2013 Timothy Palpant. This work is licensed under the LGPLv3,
+subject to the terms and conditions in LICENSE and LICENSE.LESSER.
+
+* JDAS is under an Apache License 2.0
+
+https://code.google.com/p/jdas/
+
+* A BigBed parser was used from IGV
+
+http://www.broadinstitute.org/igv/home
+
+Permission to use IGV is granted under the GNU LGPL license
